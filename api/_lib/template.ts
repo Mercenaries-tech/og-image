@@ -12,14 +12,14 @@ const bold = readFileSync(`${__dirname}/../_fonts/Inter-Bold.woff2`).toString('b
 const mono = readFileSync(`${__dirname}/../_fonts/Vera-Mono.woff2`).toString('base64');
 
 function getCss(theme: string, fontSize: string) {
-    let background = 'white';
-    let foreground = 'black';
+    let background = '#18181B';
+    let foreground = 'white';
     let radial = 'lightgray';
 
     if (theme === 'dark') {
-        background = 'black';
+        background = '#18181B';
         foreground = 'white';
-        radial = 'dimgray';
+        radial = 'lightgray';
     }
     return `
     @font-face {
@@ -45,9 +45,10 @@ function getCss(theme: string, fontSize: string) {
 
     body {
         background: ${background};
-        background-image: radial-gradient(circle at 25px 25px, ${radial} 2%, transparent 0%), radial-gradient(circle at 75px 75px, ${radial} 2%, transparent 0%);
+        // background-image: radial-gradient(circle at 25px 25px, ${radial} 2%, transparent 0%), radial-gradient(circle at 75px 75px, ${radial} 2%, transparent 0%);
         background-size: 100px 100px;
         height: 100vh;
+        width: 100vw;
         display: flex;
         text-align: center;
         align-items: center;
@@ -65,7 +66,9 @@ function getCss(theme: string, fontSize: string) {
         content: '\`';
     }
 
-    .logo-wrapper {
+    .image-wrapper {
+        width: 50vw;
+        border-radius: 25px;
         display: flex;
         align-items: center;
         align-content: center;
@@ -73,18 +76,9 @@ function getCss(theme: string, fontSize: string) {
         justify-items: center;
     }
 
-    .logo {
-        margin: 0 75px;
-    }
-
-    .plus {
-        color: #BBB;
-        font-family: Times New Roman, Verdana;
-        font-size: 100px;
-    }
-
-    .spacer {
-        margin: 150px;
+    .image {
+        width: 100%;
+        object-fit: cover;
     }
 
     .emoji {
@@ -98,49 +92,70 @@ function getCss(theme: string, fontSize: string) {
         font-family: 'Inter', sans-serif;
         font-size: ${sanitizeHtml(fontSize)};
         font-style: normal;
+        font-weight: bold;
         color: ${foreground};
         line-height: 1.8;
-    }`;
+    }
+
+    .mg-logo {
+        font-size: 50px;
+        font-weight: bold;
+        font-style: normal;
+        font-family: 'Inter', sans-serif;
+        color: ${foreground};
+    }
+    
+    .mg-subtitle {
+        font-size: 40px;
+        font-weight: bold;
+        font-style: normal;
+        font-family: 'Inter', sans-serif;
+        color: ${foreground};
+    }
+
+
+    .child {
+        width: 50vw;
+        height: 100vh;
+        color: white;
+        display: flex;
+        flex-direction: column;
+        text-align: center;
+        align-items: center;
+        justify-content: center;
+    }
+`;
 }
 
 export function getHtml(parsedReq: ParsedRequest) {
-    const { text, theme, md, fontSize, images, widths, heights } = parsedReq;
+    const { text, theme, md, fontSize, images } = parsedReq;
     return `<!DOCTYPE html>
-<html>
-    <meta charset="utf-8">
-    <title>Generated Image</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <style>
+    <html>
+      <meta charset="utf-8" />
+      <title>Generated Image</title>
+      <meta name="viewport" content="width=device-width, initial-scale=1" />
+      <style>
         ${getCss(theme, fontSize)}
-    </style>
-    <body>
-        <div>
-            <div class="spacer">
-            <div class="logo-wrapper">
-                ${images.map((img, i) =>
-                    getPlusSign(i) + getImage(img, widths[i], heights[i])
-                ).join('')}
-            </div>
-            <div class="spacer">
-            <div class="heading">${emojify(
-                md ? marked(text) : sanitizeHtml(text)
-            )}
+      </style>
+      <body>
+        <div class="child">
+          <div>
+            <img
+              width="60px"
+              src="https://llzvxlmtartturuaqvve.supabase.in/storage/v1/object/public/public/logo.png"
+            />
+            <h1 class="mg-logo">Money Games</h1>
+            <span class="mg-subtitle">The web3 arcade for risk-based mini-games</span>
+          </div>
+          <div class="heading">
+            ${emojify( md ? marked(text) : sanitizeHtml(text) )}
+          </div>
+        </div>
+        <div class="child">
+            <div class="image-wrapper">
+              <img class="image" src="${sanitizeHtml(images[0])}">
             </div>
         </div>
-    </body>
-</html>`;
-}
-
-function getImage(src: string, width ='auto', height = '225') {
-    return `<img
-        class="logo"
-        alt="Generated Image"
-        src="${sanitizeHtml(src)}"
-        width="${sanitizeHtml(width)}"
-        height="${sanitizeHtml(height)}"
-    />`
-}
-
-function getPlusSign(i: number) {
-    return i === 0 ? '' : '<div class="plus">+</div>';
+      </body>
+    </html>`;
 }
